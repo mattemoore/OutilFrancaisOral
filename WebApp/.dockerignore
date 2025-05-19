@@ -1,0 +1,18 @@
+# Git
+.git
+.gitignore
+
+# Node.js (in case you add npm packages later)
+node_modules
+npm-debug.log
+
+# Development files
+*.log
+*.md
+LICENSE
+.vscode/
+.idea/
+
+# Other common files to ignore
+.DS_Store
+Thumbs.db

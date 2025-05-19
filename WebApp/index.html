@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Oral Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header>
+        <h1>Interactive Oral Test</h1>
+    </header>
+
+    <main>
+        <section class="instructions">
+            <h2>Instructions</h2>
+            <p>Listen to the question from the virtual test taker. When ready, press the red button below to record your
+                response. Your voice will be transcribed and the virtual test taker will respond accordingly.</p>
+        </section>
+        <section class="transcript-container">
+            <div class="transcript">
+                <h2>Your Transcript</h2>
+                <div id="textOutput" class="text-output">
+                    <p class="placeholder">Recording will appear here...</p>
+                </div>
+                <div class="transcript-actions">
+                    <button id="downloadTranscriptBtn" class="download-btn" disabled>
+                        <span class="download-icon">📥</span> Download Transcript
+                    </button>
+                </div>
+            </div>
+        </section>
+        <section class="status-container">
+            <div id="status" class="status"></div>
+        </section>
+        <div class="recording-controls">
+            <div id="recordingStatus" class="recording-status"></div>
+            <button id="recordButton" class="record-button">
+                🎙️ <span class="button-text">Record</span>
+            </button>
+            <div class="timer-container">
+                <div id="timer" class="timer">00:00</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2025 Interactive Oral Test App | <a href="#">Privacy</a> | <a href="#">Support</a>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
