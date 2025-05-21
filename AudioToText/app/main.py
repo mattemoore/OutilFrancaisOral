@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import openai
 from pathlib import Path
 from pydantic_settings import BaseSettings
-from typing import Optional
+from pydantic import BaseModel
+from fastapi.responses import FileResponse
 
 class Settings(BaseSettings):
     OPENAI_API_KEY: str
@@ -75,14 +76,39 @@ async def transcribe_audio(audio_file: UploadFile = File(...)):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
-    
     finally:
-        # Clean up the temporary file
+    # Clean up the temporary file
         if file_path.exists():
             try:
                 os.unlink(file_path)
             except:
                 pass
+
+@app.get("/start-question/{question_id}")
+async def start_question(question_id: str):
+    """
+    Simple endpoint that takes a question ID and returns it.
+    This endpoint is used to demonstrate the functionality of the "Start Question" button.
+    """
+    # Check if the question ID is valid (using the same logic as in get_question_audio)
+    questions = {
+        "test-preparation": "Parlez-moi de comment vous vous préparez à cet examen. Qu'avez-vous fait pour améliorer votre français?",
+        "current-employment": "Parlez-moi de votre emploi actuel. Quel est votre poste et quelles sont vos responsabilités principales?",
+        "current-job-duties": "Décrivez-moi une journée typique dans votre travail. Quelles sont vos tâches quotidiennes?",
+        "previous-job": "Parlez-moi de votre emploi précédent. Pourquoi avez-vous changé de poste?",
+        "previous-job-duties": "Quelles étaient vos responsabilités dans votre poste précédent? En quoi étaient-elles différentes de votre poste actuel?"
+    }
+    
+    # Check if the question ID exists
+    if question_id not in questions:
+        raise HTTPException(status_code=404, detail=f"Question ID '{question_id}' not found")
+    
+    # Return the question ID as confirmation
+    return {
+        "question_id": question_id,
+        "status": "success",
+        "message": "Question started successfully"
+    }
 
 
 if __name__ == "__main__":

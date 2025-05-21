@@ -12,12 +12,26 @@
     <header>
         <h1>Interactive Oral Test</h1>
     </header>
-
     <main>
         <section class="instructions">
             <h2>Instructions</h2>
             <p>Listen to the question from the virtual test taker. When ready, press the red button below to record your
                 response. Your voice will be transcribed and the virtual test taker will respond accordingly.</p>
+        </section>
+        <section class="question-selection">
+            <h2>Question</h2>
+            <select id="questionSelect" class="question-dropdown">
+                <option value="test-preparation">Étape 1: Questions avant de commençer l'examen.</option>
+                <option value="current-employment">Étape 2: Poste courant.</option>
+                <option value="current-job-duties">Étape 3: Les responsabilités de votre poste courant.</option>
+                <option value="previous-job">Étape 4: Pose précédent.</option>
+                <option value="previous-job-duties">Étape 5: Les responsabilités de votre poste précédent.</option>
+            </select>
+            <div class="question-action">
+                <button id="startQuestionBtn" class="action-btn">
+                    <span class="question-icon">▶️</span> Start Question
+                </button>
+            </div>
         </section>
         <section class="transcript-container">
             <div class="transcript">
@@ -45,12 +59,11 @@
             </div>
         </div>
     </main>
-
     <footer>
         &copy; 2025 Interactive Oral Test App | <a href="#">Privacy</a> | <a href="#">Support</a>
     </footer>
-
     <script src="script.js"></script>
+
 </body>
 
 </html>

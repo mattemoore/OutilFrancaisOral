@@ -67,7 +67,7 @@ try {
     # Start AudioToText API service
     Write-Host "Starting AudioToText API service..." -ForegroundColor Green
     Push-Location $audioToTextDir
-    docker-compose up -d
+    podman compose up -d --build
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: Failed to start AudioToText API service." -ForegroundColor Red
         exit 1
@@ -81,7 +81,7 @@ try {
     # Start webapp service
     Write-Host "Starting webapp service..." -ForegroundColor Green
     Push-Location $webappDir
-    docker-compose up -d
+    podman compose up -d --build
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error: Failed to start webapp service." -ForegroundColor Red
         exit 1
@@ -107,12 +107,12 @@ try {
     
     # Stop webapp service
     Push-Location $webappDir
-    docker-compose down
+    podman compose down
     Pop-Location
     
     # Stop AudioToText API service
     Push-Location $audioToTextDir
-    docker-compose down
+    podman compose down
     Pop-Location
     
     Write-Host "All services stopped." -ForegroundColor Green
