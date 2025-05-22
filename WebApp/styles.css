@@ -256,6 +256,38 @@ section {
     font-style: italic;
 }
 
+.posed-question {
+    background-color: #e8f4fb;
+    border-left: 3px solid var(--primary-color);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--dark-blue);
+}
+
+.user-answer {
+    background-color: #f0f8f0;
+    border-left: 3px solid var(--secondary-color);
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.answer-timestamp {
+    color: #777;
+    font-size: 0.85em;
+    margin-right: 8px;
+    font-family: monospace;
+}
+
+.question-timestamp {
+    color: #777;
+    font-size: 0.85em;
+    margin-right: 8px;
+    font-family: monospace;
+}
+
 .status-container {
     margin-top: 1rem;
 }
@@ -280,6 +312,12 @@ section {
 .status.loading {
     background-color: #e3f2fd;
     color: var(--primary-color);
+}
+
+.status.recording {
+    background-color: #fdf1e3;
+    color: #e67e22;
+    animation: pulse 2s infinite;
 }
 
 .audio-response {

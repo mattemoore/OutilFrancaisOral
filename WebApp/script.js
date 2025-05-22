@@ -12,15 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const recordingStatus = document.getElementById('recordingStatus');
     const timer = document.getElementById('timer');
     const textOutput = document.getElementById('textOutput');
-    const status = document.getElementById('status'); const downloadTranscriptBtn = document.getElementById('downloadTranscriptBtn');
+    const status = document.getElementById('status');
+    const downloadTranscriptBtn = document.getElementById('downloadTranscriptBtn');
     const questionSelect = document.getElementById('questionSelect');
     const startQuestionBtn = document.getElementById('startQuestionBtn');
+    
     // Current question text and ID
     let currentQuestionId = questionSelect.value;
-    let currentQuestionText = '';    // API endpoints
-    const API_URL = 'http://localhost:8000/transcribe/';
-    const START_QUESTION_API_URL = 'http://localhost:8000/start-question/';
+    let currentQuestionText = '';
+    let questionHasBeenPosed = false; // Track if a question has been posed
+    
+    // API endpoints
+    const API_URL = 'http://localhost:8000/process-answer/';
+    const START_QUESTION_API_URL = 'http://localhost:8000/pose-question/';
 
+    // Helper function to scroll transcript to bottom
+    function scrollTranscriptToBottom() {
+        textOutput.scrollTop = textOutput.scrollHeight;
+    }
+    
     // Recording variables
     let mediaRecorder;
     let audioChunks = [];
@@ -29,11 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let recordingTime = 0;
 
     // Event listener for record button
-    recordButton.addEventListener('click', toggleRecording);
-
-    // Function to toggle recording
+    recordButton.addEventListener('click', toggleRecording);    // Function to toggle recording
     async function toggleRecording() {
         if (!isRecording) {
+            // Only allow recording if a question has been posed
+            if (!questionHasBeenPosed) {
+                status.textContent = 'Please pose a question before recording an answer.';
+                status.className = 'status error';
+                return;
+            }
             startRecording();
         } else {
             stopRecording();
@@ -57,14 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Start recording
             mediaRecorder.start();
             isRecording = true;
-
+            
             // Update UI
             recordButton.classList.add('recording');
             buttonText.textContent = 'Stop Recording';
             recordingStatus.textContent = 'Recording...';
-            textOutput.innerHTML = '<p class="placeholder">Recording in progress...</p>';
-            status.textContent = '';
-            status.className = 'status';
+            // Use status bar instead of transcript window for recording status
+            status.textContent = 'Recording in progress...';
+            status.className = 'status recording';
 
             // Start timer
             timerInterval = setInterval(() => {
@@ -138,10 +152,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                const data = await response.json();
-                displayTranscription(data.text);
-                status.textContent = 'Transcription complete!';
+                const data = await response.json();                appendTranscription(data.text);
+                status.textContent = 'Transcription complete! You can now pose another question.';
                 status.className = 'status success';
+                // Reset the question has been posed flag
+                questionHasBeenPosed = false;
+                // Notify user to pose another question
             } else {
                 const errorData = await response.json();
                 const errorMessage = errorData.detail || `API returned ${response.status}`;
@@ -155,20 +171,42 @@ document.addEventListener('DOMContentLoaded', () => {
             status.className = 'status error';
             textOutput.innerHTML = '<p class="placeholder">An error occurred during transcription.</p>';
         }
-    }    // Display transcription result
-    function displayTranscription(text) {
+    }
+    
+    // Display transcription result
+    function appendTranscription(text) {
         if (text && text.trim()) {
-            textOutput.innerHTML = `<p>${text}</p>`;
+            // Check if there's already content in the text output
+            const currentContent = textOutput.innerHTML;
+            const hasContent = currentContent && !currentContent.includes('placeholder');
+
+            // Create the answer element with the current timestamp
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const answerElement = `<div class="user-answer"><span class="answer-timestamp">[${timeStr}]</span> ${text}</div>`;            if (hasContent) {
+                // Append to existing content
+                textOutput.innerHTML = textOutput.innerHTML + answerElement;
+            } else {
+                // Replace any placeholder content
+                textOutput.innerHTML = answerElement;
+            }
+
+            // Scroll to bottom to show the latest content
+            scrollTranscriptToBottom();
 
             // Enable download button
             downloadTranscriptBtn.disabled = false;
         } else {
-            textOutput.innerHTML = '<p class="placeholder">No speech detected or transcribable content.</p>';
+            // Only replace with placeholder if there is no existing content
+            if (!textOutput.innerHTML || textOutput.innerHTML.includes('placeholder')) {
+                textOutput.innerHTML = '<p class="placeholder">No speech detected or transcribable content.</p>';
 
-            // Disable download button
-            downloadTranscriptBtn.disabled = true;
+                // Disable download button
+                downloadTranscriptBtn.disabled = true;
+            }
         }
     }
+    
     // Event listener for download transcript button
     downloadTranscriptBtn.addEventListener('click', downloadTranscript);
 
@@ -183,9 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to download transcript as a text file
     function downloadTranscript() {
         // Get the transcript text
-        const transcriptText = textOutput.textContent.trim();
-
-        if (!transcriptText || transcriptText === 'Recording will appear here...' ||
+        const transcriptText = textOutput.textContent.trim();        if (!transcriptText || transcriptText === 'Exam transcript will appear here...' ||
             transcriptText === 'No speech detected or transcribable content.') {
             return; // No valid text to download
         }
@@ -216,10 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(url);
         }, 100);
     }
-
-    // Function to start a question by sending it to the API
-    async function startQuestion() {
-        console.log(`Starting question: ${currentQuestionText}`);
+    
+    // Function to pose a question by sending it to the API
+    async function poseQuestion() {
+        console.log(`Posing question: ${currentQuestionText}`);
         try {
             // Update the current question ID
             currentQuestionId = questionSelect.value;
@@ -239,32 +275,56 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`Error starting question: ${response.statusText}`);
             }
-
+            
             // Get the response data
             const data = await response.json();
-
+            
             // Display the response in the status
-            status.textContent = `Question started: ${data.question_id}`;
-            status.className = 'status success';
-
-            // Get the text of the current question for history tracking
+            status.textContent = `Question posed.`;
+            status.className = 'status success';              // Append the reformulated question to the transcript window
+            if (data.reformulated_question) {
+                // Check if there's already content in the text output
+                const currentContent = textOutput.innerHTML;
+                const hasContent = currentContent && !currentContent.includes('placeholder');
+                
+                // Create the question element with timestamp
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const questionElement = `<div class="posed-question"><span class="question-timestamp">[${timeStr}]</span> ${data.reformulated_question}</div>`;
+                  if (hasContent) {
+                    // Append the question to the existing content
+                    textOutput.innerHTML = textOutput.innerHTML + questionElement;
+                } else {
+                    // Replace any placeholder content
+                    textOutput.innerHTML = questionElement;
+                }
+                
+                // Scroll to bottom to show the latest content
+                scrollTranscriptToBottom();
+                
+                // Enable download button since we now have content
+                downloadTranscriptBtn.disabled = false;
+                
+                // Set the flag to indicate a question has been posed
+                questionHasBeenPosed = true;
+            }                // Get the text of the current question for history tracking
             const questionObj = document.querySelector(`#questionSelect option[value="${currentQuestionId}"]`);
             currentQuestionText = questionObj.textContent;
 
             // Restore button state
             startQuestionBtn.disabled = false;
-            startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Start Question`;
+            startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Pose Question`;
 
-        } catch (error) {
-            console.error('Error starting question:', error);
+        } catch (error) {            console.error('Error starting question:', error);
             status.textContent = `Error: ${error.message}`;
             status.className = 'status error';
 
             // Restore button state
             startQuestionBtn.disabled = false;
-            startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Start Question`;
+            startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Pose Question`;
         }
     }
+    
     // Event listener for start question button
-    startQuestionBtn.addEventListener('click', startQuestion);
+    startQuestionBtn.addEventListener('click', poseQuestion);
 });

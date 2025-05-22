@@ -2,11 +2,11 @@ import os
 import uuid
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import openai
 from pathlib import Path
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
+from openai import OpenAI
 
 class Settings(BaseSettings):
     OPENAI_API_KEY: str
@@ -17,8 +17,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-openai.api_key = settings.OPENAI_API_KEY
-print(f"OpenAI API Key: {settings.OPENAI_API_KEY}")
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 app = FastAPI(title="French Audio to Text Converter", 
              description="REST API service that converts French audio to text using OpenAI's Whisper API")
@@ -40,8 +39,8 @@ def read_root():
     return {"message": "Welcome to the French Audio to Text Converter API"}
 
 
-@app.post("/transcribe/")
-async def transcribe_audio(audio_file: UploadFile = File(...)):
+@app.post("/process-answer/")
+async def process_answer(audio_file: UploadFile = File(...)):
     """
     Transcribe French audio file to text using OpenAI Whisper API.
     """
@@ -62,7 +61,7 @@ async def transcribe_audio(audio_file: UploadFile = File(...)):
         
         # Call OpenAI Whisper API
         with open(file_path, "rb") as audio:
-            transcript = openai.Audio.transcribe(
+            transcript_response = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=audio,
                 language="fr"
@@ -70,7 +69,7 @@ async def transcribe_audio(audio_file: UploadFile = File(...)):
         
         # Return the transcript
         return {
-            "text": transcript.text,
+            "text": transcript_response.text,
             "language": "fr"
         }
     
@@ -84,32 +83,46 @@ async def transcribe_audio(audio_file: UploadFile = File(...)):
             except:
                 pass
 
-@app.get("/start-question/{question_id}")
-async def start_question(question_id: str):
+@app.get("/pose-question/{question_id}")
+async def pose_question(question_id: str):
     """
-    Simple endpoint that takes a question ID and returns it.
-    This endpoint is used to demonstrate the functionality of the "Start Question" button.
+    Retrieves a predefined question, reformulates it using OpenAI's GPT model, 
+    and returns the reformulated question.
     """
-    # Check if the question ID is valid (using the same logic as in get_question_audio)
     questions = {
-        "test-preparation": "Parlez-moi de comment vous vous préparez à cet examen. Qu'avez-vous fait pour améliorer votre français?",
-        "current-employment": "Parlez-moi de votre emploi actuel. Quel est votre poste et quelles sont vos responsabilités principales?",
+        "current-employment": "Parlez-moi de votre emploi actuel. Quel est votre poste courant?",
         "current-job-duties": "Décrivez-moi une journée typique dans votre travail. Quelles sont vos tâches quotidiennes?",
         "previous-job": "Parlez-moi de votre emploi précédent. Pourquoi avez-vous changé de poste?",
         "previous-job-duties": "Quelles étaient vos responsabilités dans votre poste précédent? En quoi étaient-elles différentes de votre poste actuel?"
     }
     
-    # Check if the question ID exists
-    if question_id not in questions:
+    original_question = questions.get(question_id)
+    
+    if not original_question:
         raise HTTPException(status_code=404, detail=f"Question ID '{question_id}' not found")
     
-    # Return the question ID as confirmation
-    return {
-        "question_id": question_id,
-        "status": "success",
-        "message": "Question started successfully"
-    }
-
+    try:
+        # Reformulate the question using OpenAI's chat completion
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Reformulate the following French question to make it sound more natural and engaging, as but keep it professional as this question is going to be asked in a oral exam setting. Keep it in French."},
+                {"role": "user", "content": original_question}
+            ]
+        )
+        reformulated_question = chat_completion.choices[0].message.content.strip()
+        
+        return {
+            "original_question_id": question_id,
+            "original_question": original_question,
+            "reformulated_question": reformulated_question,
+            "status": "success"
+        }
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error during OpenAI API call: {str(e)}")
+        # Consider if the original question should be returned or a more specific error
+        raise HTTPException(status_code=500, detail=f"Error reformulating question: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
