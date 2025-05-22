@@ -1,12 +1,12 @@
 # French Speech-to-Text Web Application
 
-This is a simple web application that allows users to record French speech through their microphone and convert it to text using the AudioToText API.
+This is a simple web application that allows users to record French speech through their microphone and convert it to text using the API.
 
 ## Features
 
 - Record audio using the browser's microphone API
 - Visual recording indicator and timer
-- Send audio recordings to the AudioToText API
+- Send audio recordings to the API
 - Display transcribed text in a readable format
 
 ## How It Works

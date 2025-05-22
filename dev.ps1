@@ -1,10 +1,10 @@
 #!/usr/bin/env pwsh
 # start-services.ps1
-# PowerShell script to run both AudioToText API and webapp services
+# PowerShell script to run both API and webapp services
 
 # Set the base directory
 $baseDir = "c:\Code\OutilFrancaisOral"
-$audioToTextDir = Join-Path $baseDir "AudioToText"
+$apiDir = Join-Path $baseDir "API"
 $webappDir = Join-Path $baseDir "WebApp"
 
 # Function to check if Docker is running
@@ -29,14 +29,14 @@ if (-not (Test-DockerRunning)) {
 
 # Display a welcome message
 Write-Host "=== French Audio to Text Development Environment ===" -ForegroundColor Cyan
-Write-Host "This script will start both the AudioToText API and the webapp services."
+Write-Host "This script will start both the API and the webapp services."
 Write-Host "Press Ctrl+C to stop all services." -ForegroundColor Yellow
 Write-Host ""
 
 try {
     # Validate directories exist
-    if (-not (Test-Path $audioToTextDir)) {
-        Write-Host "Error: AudioToText directory not found at: $audioToTextDir" -ForegroundColor Red
+    if (-not (Test-Path $apiDir)) {
+        Write-Host "Error: API directory not found at: $apiDir" -ForegroundColor Red
         exit 1
     }
 
@@ -45,13 +45,13 @@ try {
         exit 1
     }
 
-    # Check for .env file in AudioToText directory
-    $envFile = Join-Path $audioToTextDir ".env"
+    # Check for .env file in API directory
+    $envFile = Join-Path $apiDir ".env"
     if (-not (Test-Path $envFile)) {
-        Write-Host "Warning: .env file not found in AudioToText directory." -ForegroundColor Yellow
+        Write-Host "Warning: .env file not found in API directory." -ForegroundColor Yellow
         Write-Host "Creating .env file from example. Please edit it with your OpenAI API key." -ForegroundColor Yellow
         
-        $envExampleFile = Join-Path $audioToTextDir ".env.example"
+        $envExampleFile = Join-Path $apiDir ".env.example"
         if (Test-Path $envExampleFile) {
             Copy-Item -Path $envExampleFile -Destination $envFile
             Write-Host "Created .env file from example. Please edit it with your OpenAI API key before continuing." -ForegroundColor Yellow
@@ -64,18 +64,18 @@ try {
         }
     }
 
-    # Start AudioToText API service
-    Write-Host "Starting AudioToText API service..." -ForegroundColor Green
-    Push-Location $audioToTextDir
+    # Start API service
+    Write-Host "Starting API service..." -ForegroundColor Green
+    Push-Location $apiDir
     podman compose up -d --build
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "Error: Failed to start AudioToText API service." -ForegroundColor Red
+        Write-Host "Error: Failed to start API service." -ForegroundColor Red
         exit 1
     }
     Pop-Location
 
     # Wait for API to start
-    Write-Host "Waiting for AudioToText API to start (5 seconds)..." -ForegroundColor Yellow
+    Write-Host "Waiting for API to start (5 seconds)..." -ForegroundColor Yellow
     Start-Sleep -Seconds 5
     
     # Start webapp service
@@ -92,11 +92,11 @@ try {
     Write-Host ""
     Write-Host "Services started successfully!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "AudioToText API: http://localhost:8000" -ForegroundColor Cyan
+    Write-Host "API: http://localhost:8000" -ForegroundColor Cyan
     Write-Host "Webapp: http://localhost:80" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Logs can be viewed with:" -ForegroundColor Yellow
-    Write-Host "  docker-compose -f $audioToTextDir\docker-compose.yml logs -f" -ForegroundColor Gray
+    Write-Host "  docker-compose -f $apiDir\docker-compose.yml logs -f" -ForegroundColor Gray
     Write-Host "  docker-compose -f $webappDir\docker-compose.yml logs -f" -ForegroundColor Gray
     Write-Host ""
     Write-Host "Press Enter to stop all services..." -ForegroundColor Yellow
@@ -110,8 +110,8 @@ try {
     podman compose down
     Pop-Location
     
-    # Stop AudioToText API service
-    Push-Location $audioToTextDir
+    # Stop API service
+    Push-Location $apiDir
     podman compose down
     Pop-Location
     
@@ -126,7 +126,7 @@ catch {
         docker-compose down 2>$null
         Pop-Location
         
-        Push-Location $audioToTextDir
+        Push-Location $apiDir
         docker-compose down 2>$null
         Pop-Location
     }

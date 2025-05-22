@@ -1,7 +1,7 @@
 # French Audio to Text Project
 
 This project consists of two components:
-1. **AudioToText API**: A REST API service that converts French audio to text using OpenAI's Whisper API
+1. **API**: A REST API service that converts French audio to text using OpenAI's Whisper API
 2. **Web Application**: A simple web interface for recording audio and getting text transcriptions
 
 ## Quick Start
@@ -14,7 +14,7 @@ To run both services in development mode, use the provided PowerShell script:
 
 This script will:
 - Check if Docker or equivalent is running
-- Verify the existence of a `.env` file in the AudioToText directory
+- Verify the existence of a `.env` file in the API directory
 - Start both services in the correct order
 - Provide URLs to access each service
 - Offer an option to view logs
@@ -28,17 +28,17 @@ This script will:
 
 ## Service URLs
 
-- **AudioToText API**: http://localhost:8000
+- **API**: http://localhost:8000
 - **Web Application**: http://localhost:80
 
 ## Manual Setup
 
 If you prefer to run each service manually:
 
-### AudioToText API
+### API
 
 ```powershell
-cd AudioToText
+cd API
 docker-compose up -d
 ```
 
@@ -51,9 +51,9 @@ docker-compose up -d
 
 ## Project Structure
 
-- **AudioToText/**
+- **API/**
   - REST API service using FastAPI and OpenAI Whisper
-  - See `AudioToText/README.md` for detailed documentation
+  - See `API/README.md` for detailed documentation
 
 - **webapp/**
   - Web interface for recording audio and displaying transcriptions
@@ -62,5 +62,5 @@ docker-compose up -d
 ## Additional Documentation
 
 For more details on each component, refer to their respective README files:
-- [AudioToText API Documentation](./AudioToText/README.md)
+- [API Documentation](./API/README.md)
 - [Web Application Documentation](./webapp/README.md)
