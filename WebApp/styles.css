@@ -28,6 +28,127 @@ header {
     color: #fff;
     padding: 1rem 2rem;
     text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.instructions-btn {
+    position: absolute;
+    right: 2rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.instructions-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: white;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-modal:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    line-height: 1.6;
+}
+
+.modal-body p {
+    margin-bottom: 1rem;
+}
+
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { 
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 main {
@@ -54,66 +175,6 @@ section {
     margin-bottom: 1.5rem;
 }
 
-/* Instructions section */
-.instructions {
-    background-color: #eef3f7;
-    padding: 1rem;
-    border-left: 4px solid var(--primary-color);
-    border-radius: 4px;
-    margin-bottom: 1.5rem;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.instructions.collapsed .instructions-content {
-    max-height: 0;
-    overflow: hidden;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    opacity: 0;
-}
-
-.instructions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.instructions-header h2 {
-    margin: 0;
-}
-
-.instructions-content {
-    max-height: 500px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    opacity: 1;
-}
-
-.toggle-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    color: #666;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s ease;
-    font-weight: bold;
-}
-
-.toggle-btn:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--primary-color);
-}
-
 /* Transcript "screen" section */
 .transcript-container {
     margin-bottom: 1.5rem;
@@ -127,6 +188,17 @@ section {
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+.transcript-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.transcript-header h2 {
+    margin: 0;
+}
+
 .text-output {
     background-color: var(--light-gray);
     border-radius: 6px;
@@ -136,14 +208,7 @@ section {
     overflow-y: auto;
     line-height: 1.8;
     text-align: left;
-    margin-bottom: 1rem;
     border: 1px solid #e0e0e0;
-}
-
-.transcript-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
 }
 
 /* Controls container */
@@ -161,6 +226,50 @@ section {
     background-color: #fdfdfd;
     display: flex;
     flex-direction: column;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Workflow state styling */
+.controls-column.active {
+    border-color: var(--primary-color);
+    background-color: #f8fcff;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.controls-column.disabled {
+    opacity: 0.6;
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+}
+
+.controls-column.completed {
+    border-color: var(--secondary-color);
+    background-color: #f8fff8;
+}
+
+/* Workflow indicator */
+.workflow-indicator {
+    position: absolute;
+    top: -8px;
+    right: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: none;
+}
+
+.controls-column.active .workflow-indicator {
+    display: block;
+    background-color: var(--primary-color);
+}
+
+.controls-column.completed .workflow-indicator {
+    display: block;
+    background-color: var(--secondary-color);
 }
 
 .controls-column h2 {
@@ -223,6 +332,19 @@ section {
 
 .action-btn:hover {
     background-color: #27ae60;
+}
+
+/* Enhanced button styling when in active workflow */
+.controls-column.active .action-btn,
+.controls-column.active .record-button {
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    transform: translateY(-1px);
+}
+
+.controls-column.disabled .action-btn,
+.controls-column.disabled .record-button {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Recording controls styles */
@@ -294,14 +416,17 @@ section {
 
 /* Status container */
 .status-container {
-    margin-top: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .status {
-    text-align: center;
-    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    text-align: left;
     font-size: 14px;
-    border-radius: 4px;
     min-height: 40px; /* Fixed height to prevent layout shift */
 }
 

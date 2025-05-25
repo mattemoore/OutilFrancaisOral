@@ -14,14 +14,38 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
     const downloadTranscriptBtn = document.getElementById('downloadTranscriptBtn');
     const questionSelect = document.getElementById('questionSelect');
     const startQuestionBtn = document.getElementById('startQuestionBtn');
-    const instructionsSection = document.getElementById('instructionsSection');
-    const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
-    const instructionsContent = document.getElementById('instructionsContent');
+    const showInstructionsBtn = document.getElementById('showInstructionsBtn');
+    const instructionsModal = document.getElementById('instructionsModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const questionColumn = document.getElementById('questionColumn');
+    const recordingColumn = document.getElementById('recordingColumn');
     
     // Current question text and ID
     let currentQuestionId = questionSelect.value;
     let currentQuestionText = '';
     let questionHasBeenPosed = false; // Track if a question has been posed
+      // Workflow management functions
+    function updateWorkflowState() {
+        const questionIndicator = questionColumn.querySelector('.workflow-indicator');
+        const recordingIndicator = recordingColumn.querySelector('.workflow-indicator');
+        
+        if (!questionHasBeenPosed) {
+            // Step 1: User needs to pose a question
+            questionColumn.className = 'controls-column question-column active';
+            recordingColumn.className = 'controls-column recording-column disabled';
+            questionIndicator.textContent = 'NEXT';
+            recordingIndicator.textContent = 'NEXT';
+        } else {
+            // Step 2: User can now record an answer
+            questionColumn.className = 'controls-column question-column completed';
+            recordingColumn.className = 'controls-column recording-column active';
+            questionIndicator.textContent = 'DONE';
+            recordingIndicator.textContent = 'NEXT';
+        }
+    }
+    
+    // Initialize workflow state
+    updateWorkflowState();
     
     // API endpoints
     const API_URL = 'http://localhost:8000/process-answer/';
@@ -153,11 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
             });
 
             if (response.ok) {
-                const data = await response.json();                appendTranscription(data.text);
-                status.textContent = 'Transcription complete! You can now pose another question.';
+                const data = await response.json();                appendTranscription(data.text);                status.textContent = 'Transcription complete! You can now pose another question.';
                 status.className = 'status success';
                 // Reset the question has been posed flag
                 questionHasBeenPosed = false;
+                // Update workflow state
+                updateWorkflowState();
                 // Notify user to pose another question
             } else {
                 const errorData = await response.json();
@@ -217,18 +242,45 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
         const questionObj = document.querySelector(`#questionSelect option[value="${currentQuestionId}"]`);
         currentQuestionText = questionObj.textContent;
         console.log(`Current question updated: ${currentQuestionText}`);
-    });
-
-    // Function to download transcript as a text file
+    });    // Function to download transcript as a text file
     function downloadTranscript() {
-        // Get the transcript text
-        const transcriptText = textOutput.textContent.trim();        if (!transcriptText || transcriptText === 'Exam transcript will appear here...' ||
-            transcriptText === 'No speech detected or transcribable content.') {
-            return; // No valid text to download
+        // Get all question and answer elements
+        const questions = textOutput.querySelectorAll('.posed-question');
+        const answers = textOutput.querySelectorAll('.user-answer');
+        
+        if (questions.length === 0 && answers.length === 0) {
+            return; // No valid content to download
         }
 
-        // Create a Blob with the transcript text
-        const blob = new Blob([transcriptText], { type: 'text/plain' });
+        // Build formatted transcript text
+        let formattedText = 'SLE Oral Practice Hub - Exam Transcript\n';
+        formattedText += '='.repeat(50) + '\n\n';
+        
+        // Get all transcript entries in order
+        const allEntries = Array.from(textOutput.children).filter(child => 
+            child.classList.contains('posed-question') || child.classList.contains('user-answer')
+        );
+          allEntries.forEach((entry, index) => {
+            if (entry.classList.contains('posed-question')) {
+                const timestamp = entry.querySelector('.question-timestamp')?.textContent || '';
+                const questionText = entry.textContent.replace(timestamp, '').trim();
+                formattedText += `QUESTION ${timestamp}\n`;
+                formattedText += `${questionText}\n\n`;
+            } else if (entry.classList.contains('user-answer')) {
+                const timestamp = entry.querySelector('.answer-timestamp')?.textContent || '';
+                const answerText = entry.textContent.replace(timestamp, '').trim();
+                formattedText += `ANSWER ${timestamp}\n`;
+                formattedText += `${answerText}\n\n`;
+            }
+        });
+        
+        // Add footer
+        formattedText += '='.repeat(50) + '\n';
+        formattedText += `Generated on: ${new Date().toLocaleString()}\n`;
+        formattedText += 'SLE Oral Practice Hub - Practice Session Complete';
+
+        // Create a Blob with the formatted transcript text
+        const blob = new Blob([formattedText], { type: 'text/plain' });
 
         // Create a temporary URL for the Blob
         const url = URL.createObjectURL(blob);
@@ -241,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
         const now = new Date();
         const dateStr = now.toISOString().slice(0, 10);
         const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '-');
-        a.download = `transcript_${dateStr}_${timeStr}.txt`;
+        a.download = `sle_transcript_${dateStr}_${timeStr}.txt`;
 
         // Append to body, click, and remove
         document.body.appendChild(a);
@@ -305,10 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                 
                 // Enable download button since we now have content
                 downloadTranscriptBtn.disabled = false;
-                
-                // Set the flag to indicate a question has been posed
+                  // Set the flag to indicate a question has been posed
                 questionHasBeenPosed = true;
-            }                // Get the text of the current question for history tracking
+                // Update workflow state
+                updateWorkflowState();
+            }// Get the text of the current question for history tracking
             const questionObj = document.querySelector(`#questionSelect option[value="${currentQuestionId}"]`);
             currentQuestionText = questionObj.textContent;
 
@@ -327,20 +380,26 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
     }    // Event listener for start question button
     startQuestionBtn.addEventListener('click', poseQuestion);
     
-    // Event listener for toggle instructions button
-    toggleInstructionsBtn.addEventListener('click', () => {
-        const isCollapsed = instructionsSection.classList.contains('collapsed');
-        
-        if (isCollapsed) {
-            // Expand
-            instructionsSection.classList.remove('collapsed');
-            toggleInstructionsBtn.textContent = '−';
-            toggleInstructionsBtn.title = 'Collapse instructions';
-        } else {
-            // Collapse
-            instructionsSection.classList.add('collapsed');
-            toggleInstructionsBtn.textContent = '+';
-            toggleInstructionsBtn.title = 'Expand instructions';
+    // Modal event listeners
+    showInstructionsBtn.addEventListener('click', () => {
+        instructionsModal.classList.add('show');
+    });
+    
+    closeModalBtn.addEventListener('click', () => {
+        instructionsModal.classList.remove('show');
+    });
+    
+    // Close modal when clicking outside of it
+    instructionsModal.addEventListener('click', (event) => {
+        if (event.target === instructionsModal) {
+            instructionsModal.classList.remove('show');
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && instructionsModal.classList.contains('show')) {
+            instructionsModal.classList.remove('show');
         }
     });
 });

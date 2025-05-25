@@ -10,37 +10,45 @@
 
 <body>    <header>
         <h1>SLE Oral Practice Hub</h1>
+        <button id="showInstructionsBtn" class="instructions-btn">📋 Instructions</button>
     </header>
-    <main>        <section class="instructions" id="instructionsSection">
-            <div class="instructions-header">
-                <h2>Instructions</h2>
-                <button id="toggleInstructionsBtn" class="toggle-btn" title="Toggle instructions">−</button>
-            </div>
-            <div class="instructions-content" id="instructionsContent">
-                <p>1. Select a question from the dropdown menu and click "Pose Question" to hear it spoken aloud.</p>
-                <p>2. After listening to the question, use the recording controls to capture your response.</p>
-                <p>3. Your conversation will be transcribed and displayed in the exam transcript window above.</p>
-                <p>4. Continue with additional questions to build a complete oral exam session.</p>
-            </div>
-        </section>
+    <main>
 
-        <!-- Transcript "screen" section -->
+        <!-- Instructions Modal -->
+        <div id="instructionsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Instructions</h2>
+                    <button id="closeModalBtn" class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>1. Select a question from the dropdown menu and click "Pose Question" to hear it spoken aloud.</p>
+                    <p>2. After listening to the question, use the recording controls to capture your response.</p>
+                    <p>3. Your conversation will be transcribed and displayed in the exam transcript window above.</p>
+                    <p>4. Continue with additional questions to build a complete oral exam session.</p>
+                </div>
+            </div>
+        </div>        <!-- Transcript "screen" section -->
         <section class="transcript-container">
             <div class="transcript">
-                <h2>Your Transcript</h2>
-                <div id="textOutput" class="text-output">
-                    <p class="placeholder">Exam transcript will appear here...</p>
-                </div>
-                <div class="transcript-actions">
+                <div class="transcript-header">
+                    <h2>Exam Transcript</h2>
                     <button id="downloadTranscriptBtn" class="download-btn" disabled>
                         <span class="download-icon">📥</span> Download Transcript
                     </button>
                 </div>
+                <div id="textOutput" class="text-output">
+                    <p class="placeholder">Exam transcript will appear here...</p>
+                </div>
             </div>
+        </section>
+
+        <section class="status-container">
+            <div id="status" class="status"></div>
         </section>        <!-- Controls section with two columns -->
         <div class="controls-container">
-            <!-- Left column: Question selection -->
-            <section class="controls-column question-column">
+            <!-- Left column: Question selection -->            <section class="controls-column question-column active" id="questionColumn">
+                <div class="workflow-indicator">NEXT</div>
                 <h2>Question Selection</h2>
                 <div class="control-row">
                     <select id="questionSelect" class="question-dropdown">
@@ -55,11 +63,9 @@
                         <span class="question-icon">▶️</span> Pose Question
                     </button>
                 </div>
-            </section>
-            
-            <!-- Right column: Recording controls -->
-            <section class="controls-column recording-column">
-                <h2>Recording</h2>
+            </section>            <!-- Right column: Recording controls -->            <section class="controls-column recording-column disabled" id="recordingColumn">
+                <div class="workflow-indicator">NEXT</div>
+                <h2>Answer Question</h2>
                 <div class="control-row">
                     <div class="timer-display">
                         <div id="recordingStatus" class="recording-status"></div>
@@ -70,13 +76,10 @@
                     <button id="recordButton" class="record-button">
                         🎙️ <span class="button-text">Record</span>
                     </button>
-                </div>
-            </section>
+                </div>            </section>
         </div>
 
-        <section class="status-container">
-            <div id="status" class="status"></div>
-        </section>    </main>
+    </main>
     <footer>
         <div class="footer-content">
             <div class="disclaimer">
