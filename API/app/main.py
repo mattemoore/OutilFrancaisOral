@@ -90,7 +90,7 @@ async def pose_question(question_id: str):
     and returns the reformulated question.
     """
     questions = {
-        "current-employment": "Parlez-moi de votre emploi actuel. Quel est votre poste courant?",
+        "current-employment": "Quel est votre poste courant?",
         "current-job-duties": "Décrivez-moi une journée typique dans votre travail. Quelles sont vos tâches quotidiennes?",
         "previous-job": "Parlez-moi de votre emploi précédent. Pourquoi avez-vous changé de poste?",
         "previous-job-duties": "Quelles étaient vos responsabilités dans votre poste précédent? En quoi étaient-elles différentes de votre poste actuel?"
