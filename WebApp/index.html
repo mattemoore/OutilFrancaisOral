@@ -1,37 +1,30 @@
+<!-- filepath: c:\Code\OutilFrancaisOral\WebApp\index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
+<head>    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Oral Test</title>
+    <title>SLE Oral Practice Hub</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
-    <header>
-        <h1>Interactive Oral Test</h1>
+<body>    <header>
+        <h1>SLE Oral Practice Hub</h1>
     </header>
-    <main>
-        <section class="instructions">
-            <h2>Instructions</h2>
-            <p>Listen to the question from the virtual test taker. When ready, press the red button below to record your
-                response. Your voice will be transcribed and the virtual test taker will respond accordingly.</p>
-        </section>
-        <section class="question-selection">
-            <h2>Question</h2>
-            <select id="questionSelect" class="question-dropdown">
-                <option value="current-employment">Question 1: Poste courant.</option>
-                <option value="current-job-duties">Question 2: Les responsabilités de votre poste courant.</option>
-                <option value="previous-job">Question 3: Poste précédent.</option>
-                <option value="previous-job-duties">Question 4: Les responsabilités de votre poste précédent.</option>
-            </select>
-            <div class="question-action">
-                <button id="startQuestionBtn" class="action-btn">
-                    <span class="question-icon">▶️</span> Pose Question
-                </button>
+    <main>        <section class="instructions" id="instructionsSection">
+            <div class="instructions-header">
+                <h2>Instructions</h2>
+                <button id="toggleInstructionsBtn" class="toggle-btn" title="Toggle instructions">−</button>
+            </div>
+            <div class="instructions-content" id="instructionsContent">
+                <p>1. Select a question from the dropdown menu and click "Pose Question" to hear it spoken aloud.</p>
+                <p>2. After listening to the question, use the recording controls to capture your response.</p>
+                <p>3. Your conversation will be transcribed and displayed in the exam transcript window above.</p>
+                <p>4. Continue with additional questions to build a complete oral exam session.</p>
             </div>
         </section>
+
+        <!-- Transcript "screen" section -->
         <section class="transcript-container">
             <div class="transcript">
                 <h2>Your Transcript</h2>
@@ -44,22 +37,58 @@
                     </button>
                 </div>
             </div>
-        </section>
+        </section>        <!-- Controls section with two columns -->
+        <div class="controls-container">
+            <!-- Left column: Question selection -->
+            <section class="controls-column question-column">
+                <h2>Question Selection</h2>
+                <div class="control-row">
+                    <select id="questionSelect" class="question-dropdown">
+                        <option value="current-employment">Question 1: Poste courant.</option>
+                        <option value="current-job-duties">Question 2: Les responsabilités de votre poste courant.</option>
+                        <option value="previous-job">Question 3: Poste précédent.</option>
+                        <option value="previous-job-duties">Question 4: Les responsabilités de votre poste précédent.</option>
+                    </select>
+                </div>
+                <div class="button-row">
+                    <button id="startQuestionBtn" class="action-btn">
+                        <span class="question-icon">▶️</span> Pose Question
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Right column: Recording controls -->
+            <section class="controls-column recording-column">
+                <h2>Recording</h2>
+                <div class="control-row">
+                    <div class="timer-display">
+                        <div id="recordingStatus" class="recording-status"></div>
+                        <div id="timer" class="timer">00:00</div>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="recordButton" class="record-button">
+                        🎙️ <span class="button-text">Record</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
         <section class="status-container">
             <div id="status" class="status"></div>
-        </section>
-        <div class="recording-controls">
-            <div id="recordingStatus" class="recording-status"></div>
-            <button id="recordButton" class="record-button">
-                🎙️ <span class="button-text">Record</span>
-            </button>
-            <div class="timer-container">
-                <div id="timer" class="timer">00:00</div>
+        </section>    </main>
+    <footer>
+        <div class="footer-content">
+            <div class="disclaimer">
+                <strong>Disclaimer:</strong> This application is not created, sponsored, or endorsed by the Government of Canada. 
+                It is an independent practice tool designed to help users prepare for the Second Language Evaluation – Oral Language Assessment. 
+                Performance in this application does not guarantee similar results on the official test. 
+                For official information about SLE testing, please consult the Government of Canada's official resources.
+            </div>
+            <div class="footer-links">
+                &copy; 2025 SLE Oral Practice Hub | <a href="#">Privacy</a> | <a href="#">Support</a>
             </div>
         </div>
-    </main>
-    <footer>
-        &copy; 2025 Interactive Oral Test App | <a href="#">Privacy</a> | <a href="#">Support</a>
     </footer>
     <script src="script.js"></script>
 

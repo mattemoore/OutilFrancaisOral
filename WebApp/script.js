@@ -4,9 +4,7 @@ window.onerror = function (message, source, lineno, colno, error) {
     return false;
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    // DOM elements
+document.addEventListener('DOMContentLoaded', () => {    // DOM elements
     const recordButton = document.getElementById('recordButton');
     const buttonText = recordButton.querySelector('.button-text');
     const recordingStatus = document.getElementById('recordingStatus');
@@ -16,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadTranscriptBtn = document.getElementById('downloadTranscriptBtn');
     const questionSelect = document.getElementById('questionSelect');
     const startQuestionBtn = document.getElementById('startQuestionBtn');
+    const instructionsSection = document.getElementById('instructionsSection');
+    const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+    const instructionsContent = document.getElementById('instructionsContent');
     
     // Current question text and ID
     let currentQuestionId = questionSelect.value;
@@ -323,8 +324,23 @@ document.addEventListener('DOMContentLoaded', () => {
             startQuestionBtn.disabled = false;
             startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Pose Question`;
         }
-    }
-    
-    // Event listener for start question button
+    }    // Event listener for start question button
     startQuestionBtn.addEventListener('click', poseQuestion);
+    
+    // Event listener for toggle instructions button
+    toggleInstructionsBtn.addEventListener('click', () => {
+        const isCollapsed = instructionsSection.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+            // Expand
+            instructionsSection.classList.remove('collapsed');
+            toggleInstructionsBtn.textContent = '−';
+            toggleInstructionsBtn.title = 'Collapse instructions';
+        } else {
+            // Collapse
+            instructionsSection.classList.add('collapsed');
+            toggleInstructionsBtn.textContent = '+';
+            toggleInstructionsBtn.title = 'Expand instructions';
+        }
+    });
 });
