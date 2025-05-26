@@ -451,6 +451,16 @@ section {
     animation: pulse 2s infinite;
 }
 
+.status.warning {
+    background-color: #fff9c4;
+    color: #b7791f;
+}
+
+.status.warning {
+    background-color: #fff9c4;
+    color: #b7791f;
+}
+
 /* Question and Answer styles in transcript */
 .posed-question {
     background-color: #e8f4fb;

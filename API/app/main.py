@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 from fastapi.responses import FileResponse
 from openai import OpenAI
+import base64
 
 class Settings(BaseSettings):
     OPENAI_API_KEY: str
@@ -87,7 +88,8 @@ async def process_answer(audio_file: UploadFile = File(...)):
 async def pose_question(question_id: str):
     """
     Retrieves a predefined question, reformulates it using OpenAI's GPT model, 
-    and returns the reformulated question.
+    converts it to speech using OpenAI's TTS API,
+    and returns both the reformulated question text and audio.
     """
     questions = {
         "current-employment": "Quel est votre poste courant?",
@@ -112,10 +114,24 @@ async def pose_question(question_id: str):
         )
         reformulated_question = chat_completion.choices[0].message.content.strip()
         
+        # Convert the reformulated question to speech using OpenAI's TTS API
+        speech_response = client.audio.speech.create(
+            model="tts-1",
+            voice="alloy",
+            input=reformulated_question,
+            response_format="mp3"
+        )
+        
+        # Convert audio bytes to base64 for JSON response
+        audio_bytes = speech_response.content
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+        
         return {
             "original_question_id": question_id,
             "original_question": original_question,
             "reformulated_question": reformulated_question,
+            "audio_base64": audio_base64,
+            "audio_format": "mp3",
             "status": "success"
         }
     except Exception as e:
