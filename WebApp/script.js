@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
             formData.append('audio_file', audioBlob, 'recording.webm');
 
             // Send to API
-            status.textContent = 'Sending to API...';
+            status.textContent = 'Converting answer audio to text...';
 
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -326,17 +326,21 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }, 100);
-    }
-      // Function to pose a question by sending it to the API
+    }    // Function to pose a question by sending it to the API
     async function poseQuestion() {
         console.log(`Posing question: ${currentQuestionText}`);
         try {
             // Update the current question ID
             currentQuestionId = questionSelect.value;
 
-            // Update button state
+            // Update button state with pulsing animation
             startQuestionBtn.disabled = true;
+            startQuestionBtn.classList.add('questioning');
             startQuestionBtn.innerHTML = `<span class="question-icon">⏳</span> Processing...`;
+
+            // Show initial status with pulsing animation
+            status.textContent = 'Preparing question...';
+            status.className = 'status questioning';
 
             // Send the question ID to the API
             const response = await fetch(`${START_QUESTION_API_URL}${currentQuestionId}`, {
@@ -350,12 +354,16 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                 throw new Error(`Error starting question: ${response.statusText}`);
             }
             
+            // Update status for processing response
+            status.textContent = 'Processing question response...';
+            status.className = 'status questioning';
+            
             // Get the response data
             const data = await response.json();
             
-            // Display the response in the status
-            status.textContent = `Question posed. Playing audio...`;
-            status.className = 'status success';
+            // Update status for audio preparation
+            status.textContent = 'Preparing audio playback...';
+            status.className = 'status questioning';
 
             // Append the reformulated question to the transcript window
             if (data.reformulated_question) {
@@ -390,28 +398,27 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                 // If no audio, just set the question as posed
                 questionHasBeenPosed = true;
                 updateWorkflowState();
+                
+                // Update status for no audio
+                status.textContent = 'Question posed successfully. You may now record your answer.';
+                status.className = 'status success';
             }
 
             // Get the text of the current question for history tracking
             const questionObj = document.querySelector(`#questionSelect option[value="${currentQuestionId}"]`);
             currentQuestionText = questionObj.textContent;
 
-            // Restore button state
-            startQuestionBtn.disabled = false;
-            startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Pose Question`;
-
         } catch (error) {
             console.error('Error starting question:', error);
             status.textContent = `Error: ${error.message}`;
             status.className = 'status error';
-
-            // Restore button state
+        } finally {
+            // Always restore button state
             startQuestionBtn.disabled = false;
+            startQuestionBtn.classList.remove('questioning');
             startQuestionBtn.innerHTML = `<span class="question-icon">▶️</span> Pose Question`;
         }
-    }
-
-    // Function to play question audio
+    }    // Function to play question audio
     async function playQuestionAudio(audioBase64, format) {
         return new Promise((resolve, reject) => {
             try {
@@ -420,6 +427,10 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                     currentAudio.pause();
                     currentAudio = null;
                 }
+
+                // Update status for audio setup
+                status.textContent = 'Setting up audio playback...';
+                status.className = 'status questioning';
 
                 // Convert base64 to blob
                 const audioBytes = atob(audioBase64);
@@ -437,9 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                 audioIsPlaying = true;
                 updateWorkflowState();
                 
-                // Update status
+                // Update status with pulsing animation during playback
                 status.textContent = 'Playing question audio... Please listen carefully.';
-                status.className = 'status success';
+                status.className = 'status questioning';
                 
                 // Set up event listeners
                 currentAudio.addEventListener('ended', () => {
@@ -451,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {    // DOM elements
                     URL.revokeObjectURL(audioUrl);
                     currentAudio = null;
                     
-                    // Update status
+                    // Update status to success when audio finishes
                     status.textContent = 'Question audio finished. You may now record your answer.';
                     status.className = 'status success';
                     

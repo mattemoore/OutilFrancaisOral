@@ -384,6 +384,11 @@ section {
     animation: pulse 1.5s infinite;
 }
 
+.action-btn.questioning {
+    background-color: #8e44ad;
+    animation: pulse 1.5s infinite;
+}
+
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -443,11 +448,18 @@ section {
 .status.loading {
     background-color: #e3f2fd;
     color: var(--primary-color);
+    animation: pulse 2s infinite;
 }
 
 .status.recording {
     background-color: #fdf1e3;
     color: #e67e22;
+    animation: pulse 2s infinite;
+}
+
+.status.questioning {
+    background-color: #f3e5f5;
+    color: #8e44ad;
     animation: pulse 2s infinite;
 }
 
